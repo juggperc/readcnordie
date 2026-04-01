@@ -34,7 +34,6 @@ export function CameraViewfinder({
         playsInline
         muted
         className="absolute inset-0 w-full h-full object-cover"
-        style={{ transform: 'scaleX(-1)' }}
       />
 
       <div className="absolute inset-0 vignette pointer-events-none" />
