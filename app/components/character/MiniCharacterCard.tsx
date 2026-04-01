@@ -11,7 +11,8 @@ interface MiniCharacterCardProps {
 
 export const MiniCharacterCard = memo(function MiniCharacterCard({ item, onRemove }: MiniCharacterCardProps) {
   return (
-    <motion.div
+    <motion.button
+      type="button"
       layout
       initial={{ opacity: 0, scale: 0.8, x: -20 }}
       animate={{ opacity: 1, scale: 1, x: 0 }}
@@ -19,12 +20,15 @@ export const MiniCharacterCard = memo(function MiniCharacterCard({ item, onRemov
       whileHover={{ scale: 1.05, y: -2 }}
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className="flex-shrink-0 flex flex-col items-center justify-center w-20 bg-[#1f1f1f] border border-[#262626] rounded-xl cursor-pointer hover:border-[#2a9d8f]/50 hover:shadow-[0_0_12px_rgba(42,157,143,0.15)] transition-all px-2 py-1.5"
+      className="flex w-[4.5rem] shrink-0 cursor-pointer flex-col items-center justify-center rounded-lg border border-border bg-card px-2 py-1.5 text-left transition-colors hover:border-ring/40 hover:bg-muted/50"
       onClick={onRemove}
+      aria-label={`Remove ${item.character} from sentence`}
     >
-      <span className="text-2xl font-character text-[#f5f5f5] leading-tight">{item.character}</span>
-      <span className="text-[10px] text-[#a3a3a3] leading-tight mt-0.5">{item.pinyin}</span>
-      <span className="text-[9px] text-[#525252] leading-tight truncate max-w-full">{item.definition}</span>
-    </motion.div>
+      <span className="font-character text-2xl leading-tight text-foreground">{item.character}</span>
+      <span className="mt-0.5 text-[10px] leading-tight text-muted-foreground">{item.pinyin}</span>
+      <span className="max-w-full truncate text-[9px] leading-tight text-muted-foreground/80">
+        {item.definition}
+      </span>
+    </motion.button>
   );
 });

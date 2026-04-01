@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import type { CharacterData } from '@/app/types';
 import { StrokeAnimation } from './StrokeAnimation';
 import { useApp } from '@/app/components/providers/AppProvider';
@@ -15,11 +16,11 @@ interface CharacterCardProps {
 }
 
 const ConfidenceBadge = memo(function ConfidenceBadge({ confidence }: { confidence: number }) {
-  const getColor = () => {
-    if (confidence >= 0.85) return 'text-[#2a9d8f]';
-    if (confidence >= 0.65) return 'text-[#d4a574]';
-    if (confidence >= 0.45) return 'text-orange-500';
-    return 'text-[#e63946]';
+  const getTone = () => {
+    if (confidence >= 0.85) return 'text-jade';
+    if (confidence >= 0.65) return 'text-gold';
+    if (confidence >= 0.45) return 'text-amber-500';
+    return 'text-destructive';
   };
 
   const getLabel = () => {
@@ -30,14 +31,18 @@ const ConfidenceBadge = memo(function ConfidenceBadge({ confidence }: { confiden
   };
 
   return (
-    <div className={`flex items-center gap-1.5 text-xs font-medium ${getColor()}`}>
-      <span className="w-2 h-2 rounded-full bg-current" />
+    <div className={`flex items-center gap-1.5 text-xs font-medium ${getTone()}`}>
+      <span className="size-1.5 rounded-full bg-current" aria-hidden />
       <span>{getLabel()}</span>
     </div>
   );
 });
 
-export const CharacterCard = memo(function CharacterCard({ character, onClose, onRetry }: CharacterCardProps) {
+export const CharacterCard = memo(function CharacterCard({
+  character,
+  onClose,
+  onRetry,
+}: CharacterCardProps) {
   const { addToSentence } = useApp();
 
   const handleAddToSentence = () => {
@@ -45,60 +50,79 @@ export const CharacterCard = memo(function CharacterCard({ character, onClose, o
     onClose();
   };
 
+  const handleScanAgain = () => {
+    onRetry?.();
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-      onClick={onClose}
+    <div
+      className="pointer-events-none fixed inset-x-0 z-50 flex justify-center px-4"
+      style={{
+        bottom: 'calc(7.5rem + env(safe-area-inset-bottom, 0px))',
+      }}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="character-card-title"
     >
       <motion.div
-        initial={{ opacity: 0, scale: 0.9, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="relative w-full max-w-sm bg-[#141414] border border-[#262626] rounded-2xl p-6 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: 12 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+        className="pointer-events-auto w-full max-w-sm"
       >
-        <button
-          onClick={onClose}
-          className="absolute top-4 left-4 p-2 text-[#a3a3a3] hover:text-[#f5f5f5] transition-colors"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <div className="flex flex-col items-center pt-4 gap-3">
-          <span className="text-6xl font-character text-[#f5f5f5]">
-            {character.character}
-          </span>
-
-          {character.confidence !== undefined && (
-            <ConfidenceBadge confidence={character.confidence} />
-          )}
-
-          <span className="font-mono text-lg text-[#d4a574]">
-            {character.pinyin}
-          </span>
-
-          <span className="text-sm text-[#a3a3a3] text-center">
-            {character.definition}
-          </span>
-
-          <div className="mt-2">
-            <StrokeAnimation character={character.character} size={120} />
-          </div>
-
-          <div className="flex gap-3 w-full mt-4">
-            <Button
-              onClick={handleAddToSentence}
-              className="flex-1 bg-[#2a9d8f] hover:bg-[#238b7f] text-white"
+        <Card className="relative gap-0 border-border/80 bg-card/95 py-0 shadow-lg backdrop-blur-md supports-backdrop-filter:bg-card/85">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={onClose}
+            className="absolute right-2 top-2 z-10 text-muted-foreground hover:text-foreground"
+            aria-label="Close character details"
+          >
+            <X className="size-4" />
+          </Button>
+          <CardContent className="flex flex-col items-center gap-3 px-4 pb-2 pt-10">
+            <span
+              id="character-card-title"
+              className="font-character text-5xl leading-none text-foreground"
             >
-              Add
+              {character.character}
+            </span>
+
+            {character.confidence !== undefined && (
+              <ConfidenceBadge confidence={character.confidence} />
+            )}
+
+            <span className="font-mono text-base text-muted-foreground">
+              {character.pinyin}
+            </span>
+
+            <p className="text-center text-sm leading-snug text-muted-foreground">
+              {character.definition}
+            </p>
+
+            <div className="py-1">
+              <StrokeAnimation character={character.character} size={112} />
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-col gap-2 border-t border-border/60 bg-muted/30 px-4 py-3 sm:flex-row sm:justify-end">
+            {onRetry && (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:w-auto"
+                onClick={handleScanAgain}
+              >
+                Scan again
+              </Button>
+            )}
+            <Button type="button" className="w-full sm:w-auto" onClick={handleAddToSentence}>
+              Add to sentence
             </Button>
-          </div>
-        </div>
+          </CardFooter>
+        </Card>
       </motion.div>
-    </motion.div>
+    </div>
   );
 });

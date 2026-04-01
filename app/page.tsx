@@ -9,8 +9,6 @@ import { useCamera } from '@/app/hooks/useCamera';
 import { useOCR } from '@/app/hooks/useOCR';
 import { useApp } from '@/app/components/providers/AppProvider';
 import { findCharacter } from '@/lib/character-data';
-import type { CharacterData } from '@/app/types';
-
 export default function Home() {
   const { videoRef, cameraState, error, captureFrame, zoom, setZoom, maxZoom } = useCamera();
   const { recognize, isReady } = useOCR();

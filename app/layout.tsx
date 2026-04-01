@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#0a0a0a',
+  themeColor: '#09090b',
 };
 
 export default function RootLayout({
@@ -28,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="h-screen w-screen overflow-hidden bg-[#0a0a0a]">
+      <body className="h-screen w-screen overflow-hidden bg-background">
         <AppProvider>{children}</AppProvider>
       </body>
     </html>

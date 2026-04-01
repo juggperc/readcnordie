@@ -50,16 +50,16 @@ export const CameraViewfinder = memo(function CameraViewfinder({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 flex items-center justify-center bg-black/60"
+            className="absolute inset-0 flex items-center justify-center bg-background/70"
           >
             <div className="flex flex-col items-center gap-4">
               <motion.div
                 animate={{ rotate: 360 }}
                 transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
               >
-                <Camera className="w-8 h-8 text-white/60" />
+                <Camera className="size-8 text-muted-foreground" />
               </motion.div>
-              <p className="text-white/60 text-sm">Initializing camera...</p>
+              <p className="text-sm text-muted-foreground">Starting camera…</p>
             </div>
           </motion.div>
         )}
@@ -69,11 +69,11 @@ export const CameraViewfinder = memo(function CameraViewfinder({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="absolute inset-0 flex items-center justify-center bg-black/80"
+            className="absolute inset-0 flex items-center justify-center bg-background/90"
           >
-            <div className="text-center px-6">
-              <p className="text-[#e63946] mb-2">Camera Access Denied</p>
-              <p className="text-white/60 text-sm">{error}</p>
+            <div className="px-6 text-center">
+              <p className="mb-2 text-sm font-medium text-destructive">Camera unavailable</p>
+              <p className="text-sm text-muted-foreground">{error}</p>
             </div>
           </motion.div>
         )}

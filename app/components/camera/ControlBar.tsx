@@ -20,10 +20,10 @@ export const ControlBar = memo(function ControlBar({ onCapture, isProcessing, di
   }, [onZoomChange]);
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 pb-safe-bottom px-6 py-6 flex flex-col items-center gap-4">
+    <div className="absolute bottom-0 left-0 right-0 z-[60] flex flex-col items-center gap-4 px-6 pb-safe-bottom pt-2">
       {onZoomChange && (
-        <div className="flex items-center gap-3 w-full max-w-xs">
-          <ZoomIn className="w-4 h-4 text-white/60" />
+        <div className="flex w-full max-w-xs items-center gap-3">
+          <ZoomIn className="size-4 text-muted-foreground" aria-hidden />
           <input
             type="range"
             min={1}
@@ -31,19 +31,30 @@ export const ControlBar = memo(function ControlBar({ onCapture, isProcessing, di
             step={0.1}
             value={zoom}
             onChange={handleZoomChange}
-            className="flex-1 h-1 bg-white/20 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+            aria-label="Camera zoom"
+            className="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-muted [&::-webkit-slider-thumb]:size-3 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-foreground"
           />
-          <span className="text-xs text-white/60 w-8">{zoom.toFixed(1)}x</span>
+          <span className="w-8 text-right text-xs tabular-nums text-muted-foreground">
+            {zoom.toFixed(1)}×
+          </span>
         </div>
       )}
 
       <button
+        type="button"
         onClick={onCapture}
         disabled={disabled || isProcessing}
-        className="relative w-18 h-18 rounded-full flex items-center justify-center disabled:opacity-50"
+        aria-label={isProcessing ? 'Recognizing character' : 'Capture character'}
+        className="relative flex size-[4.5rem] items-center justify-center rounded-full disabled:opacity-50"
       >
-        <div className="absolute inset-0 rounded-full border-4 border-[#e63946]" />
-        <div className={`w-14 h-14 rounded-full ${isProcessing ? 'bg-[#e63946]' : 'bg-white'}`} />
+        <span className="absolute inset-0 rounded-full border-[3px] border-foreground/90" />
+        <span
+          className={
+            isProcessing
+              ? 'size-14 rounded-full bg-foreground/90'
+              : 'size-14 rounded-full bg-background ring-1 ring-border'
+          }
+        />
       </button>
     </div>
   );

@@ -17,8 +17,8 @@ export const SentenceBuilder = memo(function SentenceBuilder() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-40 pt-safe-top">
-      <div className="bg-gradient-to-b from-black/90 to-black/60 backdrop-blur-md border-b border-[#262626]/50">
-        <div className="flex items-center gap-3 px-4 py-3">
+      <div className="border-b border-border/80 bg-background/80 backdrop-blur-md">
+        <div className="flex items-center gap-3 px-4 py-2.5">
           <div className="flex-1 overflow-x-auto scrollbar-hide">
             <AnimatePresence mode="popLayout">
               {isEmpty ? (
@@ -26,10 +26,10 @@ export const SentenceBuilder = memo(function SentenceBuilder() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="flex items-center gap-2 text-[#525252]"
+                  className="flex items-center gap-2 text-muted-foreground"
                 >
-                  <BookOpen className="w-4 h-4" />
-                  <span className="text-sm">Scan characters to build a sentence</span>
+                  <BookOpen className="size-4 shrink-0" />
+                  <span className="text-sm">Scan to add characters</span>
                 </motion.div>
               ) : (
                 <motion.div className="flex items-center gap-2">
@@ -55,9 +55,9 @@ export const SentenceBuilder = memo(function SentenceBuilder() {
                 variant="ghost"
                 size="icon"
                 onClick={handleClear}
-                className="w-9 h-9 rounded-full text-[#a3a3a3] hover:text-[#e63946] hover:bg-[#e63946]/10"
+                className="size-9 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="size-4" />
               </Button>
             </motion.div>
           )}

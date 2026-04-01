@@ -8,10 +8,10 @@ interface ScanReticleProps {
 
 export function ScanReticle({ state }: ScanReticleProps) {
   const isError = state === 'error';
-  const strokeColor = isError ? '#e63946' : '#e63946';
+  const strokeColor = isError ? 'var(--destructive)' : 'var(--foreground)';
 
   return (
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 pointer-events-none opacity-30">
+    <div className="pointer-events-none absolute left-1/2 top-1/2 size-36 -translate-x-1/2 -translate-y-1/2 opacity-25">
       <svg
         viewBox="0 0 200 200"
         className="w-full h-full"
