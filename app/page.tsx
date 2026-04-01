@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { CameraViewfinder } from '@/app/components/camera/CameraViewfinder';
 import { ControlBar } from '@/app/components/camera/ControlBar';
@@ -10,62 +10,48 @@ import { useCamera } from '@/app/hooks/useCamera';
 import { useOCR } from '@/app/hooks/useOCR';
 import { useApp } from '@/app/components/providers/AppProvider';
 import { findCharacter } from '@/lib/character-data';
+
 export default function Home() {
   const { videoRef, cameraState, error, captureFrame, zoom, setZoom, maxZoom } = useCamera();
   const { recognize, isReady, isLoading: isOcrLoading } = useOCR();
   const { setIsProcessing, activeCard, setActiveCard, setLastScanned } = useApp();
   const [isCapturing, setIsCapturing] = useState(false);
-  const isCapturingRef = useRef(false);
-  const handleCaptureRef = useRef<() => Promise<void>>(async () => {});
+  const busyRef = useRef(false);
+  const pendingRetryRef = useRef(false);
 
-  const handleCapture = useCallback(async () => {
-    if (isCapturingRef.current || !isReady) return;
+  const doCapture = useCallback(async () => {
+    if (busyRef.current || !isReady) return;
 
-    isCapturingRef.current = true;
+    busyRef.current = true;
     setIsCapturing(true);
     setIsProcessing(true);
 
     try {
       const frameData = captureFrame();
-      if (!frameData) {
-        isCapturingRef.current = false;
-        setIsCapturing(false);
-        setIsProcessing(false);
-        return;
-      }
+      if (!frameData) return;
 
       const result = await recognize(frameData);
-      if (!result?.text) {
-        isCapturingRef.current = false;
-        setIsCapturing(false);
-        setIsProcessing(false);
-        return;
-      }
+      if (!result?.text) return;
 
       const char = result.text.charAt(0);
       const charData = await findCharacter(char);
-      if (!charData) {
-        isCapturingRef.current = false;
-        setIsCapturing(false);
-        setIsProcessing(false);
-        return;
-      }
+      if (!charData) return;
 
-      const charDataWithConfidence = { ...charData, confidence: result.confidence };
-      setLastScanned(charDataWithConfidence);
-      setActiveCard(charDataWithConfidence);
-    } catch (error) {
-      console.error('Capture error:', error);
+      const withConfidence = { ...charData, confidence: result.confidence };
+      setLastScanned(withConfidence);
+      setActiveCard(withConfidence);
+    } catch (err) {
+      console.error('Capture error:', err);
     } finally {
-      isCapturingRef.current = false;
+      busyRef.current = false;
       setIsCapturing(false);
       setIsProcessing(false);
     }
   }, [captureFrame, isReady, recognize, setActiveCard, setIsProcessing, setLastScanned]);
 
-  useEffect(() => {
-    handleCaptureRef.current = handleCapture;
-  }, [handleCapture]);
+  const handleCapture = useCallback(() => {
+    doCapture();
+  }, [doCapture]);
 
   const handleCloseCard = useCallback(() => {
     setActiveCard(null);
@@ -73,10 +59,14 @@ export default function Home() {
 
   const handleRetry = useCallback(() => {
     setActiveCard(null);
-    setTimeout(() => {
-      handleCaptureRef.current();
-    }, 100);
-  }, [setActiveCard]);
+    pendingRetryRef.current = true;
+    requestAnimationFrame(() => {
+      if (pendingRetryRef.current) {
+        pendingRetryRef.current = false;
+        doCapture();
+      }
+    });
+  }, [setActiveCard, doCapture]);
 
   return (
     <main className="relative h-full w-full">
@@ -101,7 +91,6 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Control bar must sit above CharacterCard (z-50); z-index inside the camera subtree cannot win. */}
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[70]">
         <div className="pointer-events-auto">
           <ControlBar
