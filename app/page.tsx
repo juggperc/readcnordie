@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { CameraViewfinder } from '@/app/components/camera/CameraViewfinder';
 import { CharacterCard } from '@/app/components/character/CharacterCard';
@@ -20,10 +20,8 @@ export default function Home() {
   const handleCaptureRef = useRef<() => Promise<void>>(async () => {});
 
   const handleCapture = useCallback(async () => {
-    // Use ref for synchronous check - always current value
     if (isCapturingRef.current || !isReady) return;
 
-    // Set ref FIRST before any async work
     isCapturingRef.current = true;
     setIsCapturing(true);
     setIsProcessing(true);
@@ -66,8 +64,9 @@ export default function Home() {
     }
   }, [captureFrame, isReady, recognize, setActiveCard, setIsProcessing, setLastScanned]);
 
-  // Keep ref always pointing to latest handleCapture
-  handleCaptureRef.current = handleCapture;
+  useEffect(() => {
+    handleCaptureRef.current = handleCapture;
+  }, [handleCapture]);
 
   const handleCloseCard = useCallback(() => {
     setActiveCard(null);
@@ -75,7 +74,6 @@ export default function Home() {
 
   const handleRetry = useCallback(() => {
     setActiveCard(null);
-    // Small delay to allow card to close before new capture
     setTimeout(() => {
       handleCaptureRef.current();
     }, 100);
