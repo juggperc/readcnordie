@@ -23,22 +23,17 @@ const ConfidenceBadge = memo(function ConfidenceBadge({ confidence }: { confiden
   };
 
   const getLabel = () => {
-    if (confidence >= 0.85) return 'High confidence';
+    if (confidence >= 0.85) return 'High';
     if (confidence >= 0.65) return 'Good';
-    if (confidence >= 0.45) return 'Low - tap retry';
-    return 'Very low - verify';
+    if (confidence >= 0.45) return 'Low';
+    return 'Verify';
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className={`flex items-center gap-1.5 text-xs font-medium ${getColor()}`}
-    >
+    <div className={`flex items-center gap-1.5 text-xs font-medium ${getColor()}`}>
       <span className="w-2 h-2 rounded-full bg-current" />
       <span>{getLabel()}</span>
-      <span className="text-xs opacity-60">({Math.round(confidence * 100)}%)</span>
-    </motion.div>
+    </div>
   );
 });
 
@@ -73,76 +68,33 @@ export const CharacterCard = memo(function CharacterCard({ character, onClose, o
           <X className="w-5 h-5" />
         </button>
 
-        <div className="flex flex-col items-center pt-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
-            className="text-6xl font-character text-[#f5f5f5] mb-2"
-          >
+        <div className="flex flex-col items-center pt-4 gap-3">
+          <span className="text-6xl font-character text-[#f5f5f5]">
             {character.character}
-          </motion.div>
+          </span>
 
           {character.confidence !== undefined && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.15 }}
-              className="mb-3"
-            >
-              <ConfidenceBadge confidence={character.confidence} />
-            </motion.div>
+            <ConfidenceBadge confidence={character.confidence} />
           )}
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="font-mono text-lg text-[#d4a574] mb-4"
-          >
+          <span className="font-mono text-lg text-[#d4a574]">
             {character.pinyin}
-          </motion.p>
+          </span>
 
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.25 }}
-            className="text-[#a3a3a3] text-center mb-6"
-          >
+          <span className="text-sm text-[#a3a3a3] text-center">
             {character.definition}
-          </motion.p>
+          </span>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mb-6"
-          >
-            <StrokeAnimation character={character.character} size={150} />
-          </motion.div>
+          <div className="mt-2">
+            <StrokeAnimation character={character.character} size={120} />
+          </div>
 
-          <div className="flex gap-3 w-full">
-            <Button
-              variant="outline"
-              onClick={onClose}
-              className="flex-1 bg-transparent border-[#262626] text-[#a3a3a3] hover:bg-[#262626] hover:text-[#f5f5f5]"
-            >
-              Discard
-            </Button>
-            {character.confidence !== undefined && character.confidence < 0.65 && onRetry && (
-              <Button
-                variant="ghost"
-                onClick={onRetry}
-                className="flex-1 bg-orange-500/20 border border-orange-500/50 text-orange-400 hover:bg-orange-500/30"
-              >
-                Retry Scan
-              </Button>
-            )}
+          <div className="flex gap-3 w-full mt-4">
             <Button
               onClick={handleAddToSentence}
               className="flex-1 bg-[#2a9d8f] hover:bg-[#238b7f] text-white"
             >
-              Add to Sentence
+              Add
             </Button>
           </div>
         </div>

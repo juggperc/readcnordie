@@ -17,6 +17,7 @@ export default function Home() {
   const { setIsProcessing, activeCard, setActiveCard, setLastScanned } = useApp();
   const [isCapturing, setIsCapturing] = useState(false);
   const isCapturingRef = useRef(false);
+  const handleCaptureRef = useRef<() => Promise<void>>(async () => {});
 
   const handleCapture = useCallback(async () => {
     // Use ref for synchronous check - always current value
@@ -65,6 +66,9 @@ export default function Home() {
     }
   }, [captureFrame, isReady, recognize, setActiveCard, setIsProcessing, setLastScanned]);
 
+  // Keep ref always pointing to latest handleCapture
+  handleCaptureRef.current = handleCapture;
+
   const handleCloseCard = useCallback(() => {
     setActiveCard(null);
   }, [setActiveCard]);
@@ -73,9 +77,9 @@ export default function Home() {
     setActiveCard(null);
     // Small delay to allow card to close before new capture
     setTimeout(() => {
-      handleCapture();
+      handleCaptureRef.current();
     }, 100);
-  }, [setActiveCard, handleCapture]);
+  }, [setActiveCard]);
 
   return (
     <main className="relative h-full w-full">

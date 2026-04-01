@@ -370,6 +370,7 @@ export function useOCR() {
 
       return result.result || null;
     } catch (error) {
+      console.error('OCR recognize error:', error);
       await recoverWorker();
       workerRecycleCount.current = 0;
       return null;

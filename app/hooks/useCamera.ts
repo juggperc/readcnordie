@@ -10,6 +10,10 @@ export function useCamera() {
   const [zoom, setZoom] = useState(1);
   const [maxZoom, setMaxZoom] = useState(5);
 
+  // Use ref to avoid stale closure in captureFrame
+  const cameraStateRef = useRef<CameraState>('loading');
+  cameraStateRef.current = cameraState;
+
   const applyZoom = useCallback((zoomLevel: number) => {
     const track = streamRef.current?.getVideoTracks()[0];
     if (track) {
@@ -83,7 +87,7 @@ export function useCamera() {
   }, []);
 
   const captureFrame = useCallback((): ImageData | null => {
-    if (!videoRef.current || cameraState !== 'active') {
+    if (!videoRef.current || cameraStateRef.current !== 'active') {
       return null;
     }
 
@@ -109,7 +113,7 @@ export function useCamera() {
     context.drawImage(video, x, y, size, size, 0, 0, size, size);
 
     return context.getImageData(0, 0, size, size);
-  }, [cameraState]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
