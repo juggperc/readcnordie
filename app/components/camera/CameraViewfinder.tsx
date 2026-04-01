@@ -1,6 +1,5 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { CameraState } from '@/app/types';
 import { ScanReticle } from './ScanReticle';
@@ -13,6 +12,9 @@ interface CameraViewfinderProps {
   error: string | null;
   onCapture: () => void;
   isProcessing: boolean;
+  zoom?: number;
+  maxZoom?: number;
+  onZoomChange?: (zoom: number) => void;
 }
 
 export function CameraViewfinder({
@@ -21,6 +23,9 @@ export function CameraViewfinder({
   error,
   onCapture,
   isProcessing,
+  zoom,
+  maxZoom,
+  onZoomChange,
 }: CameraViewfinderProps) {
   const isActive = cameraState === 'active';
   const isLoading = cameraState === 'loading';
@@ -35,8 +40,6 @@ export function CameraViewfinder({
         muted
         className="absolute inset-0 w-full h-full object-cover"
       />
-
-      <div className="absolute inset-0 vignette pointer-events-none" />
 
       <ScanReticle state={cameraState} />
 
@@ -79,6 +82,9 @@ export function CameraViewfinder({
         onCapture={onCapture}
         isProcessing={isProcessing}
         disabled={!isActive}
+        zoom={zoom}
+        maxZoom={maxZoom}
+        onZoomChange={onZoomChange}
       />
     </div>
   );

@@ -1,21 +1,26 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import type { CameraState } from '@/app/types';
 
-const SAFARI_CAMERA_CONFIG: MediaStreamConstraints = {
-  video: {
-    facingMode: { ideal: 'environment' },
-    width: { ideal: 1280 },
-    height: { ideal: 720 },
-    frameRate: { ideal: 15 },
-  },
-  audio: false,
-};
-
 export function useCamera() {
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const [cameraState, setCameraState] = useState<CameraState>('loading');
   const [error, setError] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const maxZoom = 5;
+
+  const applyZoom = useCallback((zoomLevel: number) => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (track) {
+      const capabilities = track.getCapabilities() as MediaTrackCapabilities & { zoom?: { min: number; max: number } };
+      if (capabilities.zoom) {
+        track.applyConstraints({
+          advanced: [{ zoom: zoomLevel } as MediaTrackConstraintSet]
+        });
+      }
+    }
+    setZoom(zoomLevel);
+  }, []);
 
   const startCamera = useCallback(async () => {
     setCameraState('loading');
@@ -26,8 +31,27 @@ export function useCamera() {
         throw new Error('Camera API not supported in this browser');
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia(SAFARI_CAMERA_CONFIG);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 15 },
+        },
+        audio: false,
+      });
       streamRef.current = stream;
+
+      // Get max zoom after stream starts
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        const capabilities = track.getCapabilities() as MediaTrackCapabilities & { zoom?: { min: number; max: number } };
+        if (capabilities.zoom) {
+          const stored = Number(localStorage.getItem('cameraZoom') || '1');
+          const initialZoom = Math.min(Math.max(stored, 1), capabilities.zoom.max);
+          applyZoom(initialZoom);
+        }
+      }
 
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
@@ -40,11 +64,11 @@ export function useCamera() {
       setError(errorMessage);
       setCameraState('error');
     }
-  }, []);
+  }, [applyZoom]);
 
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current.getVideoTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     if (videoRef.current) {
@@ -60,7 +84,7 @@ export function useCamera() {
 
     const video = videoRef.current;
     const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext('2d', { willReadFrequently: true });
 
     if (!context) {
       return null;
@@ -92,5 +116,8 @@ export function useCamera() {
     startCamera,
     stopCamera,
     captureFrame,
+    zoom,
+    setZoom: applyZoom,
+    maxZoom,
   };
 }

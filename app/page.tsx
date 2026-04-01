@@ -12,7 +12,7 @@ import { findCharacter } from '@/lib/character-data';
 import type { CharacterData } from '@/app/types';
 
 export default function Home() {
-  const { videoRef, cameraState, error, captureFrame } = useCamera();
+  const { videoRef, cameraState, error, captureFrame, zoom, setZoom, maxZoom } = useCamera();
   const { recognize, isReady } = useOCR();
   const { setIsProcessing, activeCard, setActiveCard, setLastScanned } = useApp();
   const [isCapturing, setIsCapturing] = useState(false);
@@ -63,6 +63,9 @@ export default function Home() {
           error={error}
           onCapture={handleCapture}
           isProcessing={isCapturing}
+          zoom={zoom}
+          maxZoom={maxZoom}
+          onZoomChange={setZoom}
         />
       </div>
 
