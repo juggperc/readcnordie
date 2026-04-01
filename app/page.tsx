@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { CameraViewfinder } from '@/app/components/camera/CameraViewfinder';
+import { ControlBar } from '@/app/components/camera/ControlBar';
 import { CharacterCard } from '@/app/components/character/CharacterCard';
 import { SentenceBuilder } from '@/app/components/sentence/SentenceBuilder';
 import { useCamera } from '@/app/hooks/useCamera';
@@ -11,7 +12,7 @@ import { useApp } from '@/app/components/providers/AppProvider';
 import { findCharacter } from '@/lib/character-data';
 export default function Home() {
   const { videoRef, cameraState, error, captureFrame, zoom, setZoom, maxZoom } = useCamera();
-  const { recognize, isReady } = useOCR();
+  const { recognize, isReady, isLoading: isOcrLoading } = useOCR();
   const { setIsProcessing, activeCard, setActiveCard, setLastScanned } = useApp();
   const [isCapturing, setIsCapturing] = useState(false);
   const isCapturingRef = useRef(false);
@@ -86,11 +87,7 @@ export default function Home() {
           videoRef={videoRef}
           cameraState={cameraState}
           error={error}
-          onCapture={handleCapture}
-          isProcessing={isCapturing}
-          zoom={zoom}
-          maxZoom={maxZoom}
-          onZoomChange={setZoom}
+          isOcrReady={isReady}
         />
       </div>
 
@@ -103,6 +100,20 @@ export default function Home() {
           />
         )}
       </AnimatePresence>
+
+      {/* Control bar must sit above CharacterCard (z-50); z-index inside the camera subtree cannot win. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[70]">
+        <div className="pointer-events-auto">
+          <ControlBar
+            onCapture={handleCapture}
+            isProcessing={isCapturing || isOcrLoading}
+            disabled={cameraState !== 'active' || !isReady}
+            zoom={zoom}
+            maxZoom={maxZoom}
+            onZoomChange={setZoom}
+          />
+        </div>
+      </div>
     </main>
   );
 }

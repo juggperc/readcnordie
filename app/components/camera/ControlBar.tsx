@@ -20,7 +20,7 @@ export const ControlBar = memo(function ControlBar({ onCapture, isProcessing, di
   }, [onZoomChange]);
 
   return (
-    <div className="absolute bottom-0 left-0 right-0 z-[60] flex flex-col items-center gap-4 px-6 pb-safe-bottom pt-2">
+    <div className="flex w-full flex-col items-center gap-4 px-6 pb-safe-bottom pt-2">
       {onZoomChange && (
         <div className="flex w-full max-w-xs items-center gap-3">
           <ZoomIn className="size-4 text-muted-foreground" aria-hidden />

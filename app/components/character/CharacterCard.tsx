@@ -56,7 +56,7 @@ export const CharacterCard = memo(function CharacterCard({
 
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 z-50 flex justify-center px-4"
+      className="pointer-events-none fixed inset-x-0 z-50 flex max-h-[min(52vh,calc(100vh-11rem))] justify-center overflow-y-auto px-4 pb-2"
       style={{
         bottom: 'calc(7.5rem + env(safe-area-inset-bottom, 0px))',
       }}

@@ -4,31 +4,21 @@ import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { CameraState } from '@/app/types';
 import { ScanReticle } from './ScanReticle';
-import { ControlBar } from './ControlBar';
 import { Camera } from 'lucide-react';
 
 interface CameraViewfinderProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   cameraState: CameraState;
   error: string | null;
-  onCapture: () => void;
-  isProcessing: boolean;
-  zoom?: number;
-  maxZoom?: number;
-  onZoomChange?: (zoom: number) => void;
+  isOcrReady?: boolean;
 }
 
 export const CameraViewfinder = memo(function CameraViewfinder({
   videoRef,
   cameraState,
   error,
-  onCapture,
-  isProcessing,
-  zoom,
-  maxZoom,
-  onZoomChange,
+  isOcrReady = true,
 }: CameraViewfinderProps) {
-  const isActive = cameraState === 'active';
   const isLoading = cameraState === 'loading';
   const hasError = cameraState === 'error';
 
@@ -64,6 +54,17 @@ export const CameraViewfinder = memo(function CameraViewfinder({
           </motion.div>
         )}
 
+        {!isLoading && !hasError && !isOcrReady && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 flex items-center justify-center bg-background/60"
+          >
+            <p className="text-sm text-muted-foreground">Loading text recognition…</p>
+          </motion.div>
+        )}
+
         {hasError && error && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -78,15 +79,6 @@ export const CameraViewfinder = memo(function CameraViewfinder({
           </motion.div>
         )}
       </AnimatePresence>
-
-      <ControlBar
-        onCapture={onCapture}
-        isProcessing={isProcessing}
-        disabled={!isActive}
-        zoom={zoom}
-        maxZoom={maxZoom}
-        onZoomChange={onZoomChange}
-      />
     </div>
   );
 });
