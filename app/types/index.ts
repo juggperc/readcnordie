@@ -2,6 +2,7 @@ export interface CharacterData {
   character: string;
   pinyin: string;
   definition: string;
+  confidence?: number;
 }
 
 export interface SentenceItem {

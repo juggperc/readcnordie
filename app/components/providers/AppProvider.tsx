@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useState, useCallback, useRef, useEffect } from 'react';
+import { createContext, useContext, ReactNode, useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import type { CharacterData, SentenceItem } from '@/app/types';
 
 interface AppContextType {
@@ -29,7 +29,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addToSentence = useCallback((char: CharacterData) => {
     const newItem: SentenceItem = {
-      id: `${char.character}-${Date.now()}`,
+      id: crypto.randomUUID(),
       character: char.character,
       pinyin: char.pinyin,
       definition: char.definition,
@@ -45,23 +45,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setSentence([]);
   }, []);
 
+  const value = useMemo(() => ({
+    sentence,
+    addToSentence,
+    removeFromSentence,
+    clearSentence,
+    isScanning,
+    setIsScanning,
+    isProcessing,
+    setIsProcessing,
+    lastScanned,
+    setLastScanned,
+    activeCard,
+    setActiveCard,
+  }), [sentence, addToSentence, removeFromSentence, clearSentence, isScanning, isProcessing, lastScanned, activeCard]);
+
   return (
-    <AppContext.Provider
-      value={{
-        sentence,
-        addToSentence,
-        removeFromSentence,
-        clearSentence,
-        isScanning,
-        setIsScanning,
-        isProcessing,
-        setIsProcessing,
-        lastScanned,
-        setLastScanned,
-        activeCard,
-        setActiveCard,
-      }}
-    >
+    <AppContext.Provider value={value}>
       {children}
     </AppContext.Provider>
   );

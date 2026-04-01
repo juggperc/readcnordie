@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { CameraState } from '@/app/types';
 import { ScanReticle } from './ScanReticle';
@@ -17,7 +18,7 @@ interface CameraViewfinderProps {
   onZoomChange?: (zoom: number) => void;
 }
 
-export function CameraViewfinder({
+export const CameraViewfinder = memo(function CameraViewfinder({
   videoRef,
   cameraState,
   error,
@@ -88,4 +89,4 @@ export function CameraViewfinder({
       />
     </div>
   );
-}
+});

@@ -1,14 +1,19 @@
 'use client';
 
+import { memo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Trash2, BookOpen } from 'lucide-react';
 import { useApp } from '@/app/components/providers/AppProvider';
 import { MiniCharacterCard } from '@/app/components/character/MiniCharacterCard';
 import { Button } from '@/components/ui/button';
 
-export function SentenceBuilder() {
+export const SentenceBuilder = memo(function SentenceBuilder() {
   const { sentence, removeFromSentence, clearSentence } = useApp();
   const isEmpty = sentence.length === 0;
+
+  const handleClear = useCallback(() => {
+    clearSentence();
+  }, [clearSentence]);
 
   return (
     <div className="fixed top-0 left-0 right-0 z-40 pt-safe-top">
@@ -49,7 +54,7 @@ export function SentenceBuilder() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={clearSentence}
+                onClick={handleClear}
                 className="w-9 h-9 rounded-full text-[#a3a3a3] hover:text-[#e63946] hover:bg-[#e63946]/10"
               >
                 <Trash2 className="w-4 h-4" />
@@ -60,4 +65,4 @@ export function SentenceBuilder() {
       </div>
     </div>
   );
-}
+});

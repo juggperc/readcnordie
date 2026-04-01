@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { motion } from 'framer-motion';
 import type { SentenceItem } from '@/app/types';
 
@@ -8,7 +9,7 @@ interface MiniCharacterCardProps {
   onRemove: () => void;
 }
 
-export function MiniCharacterCard({ item, onRemove }: MiniCharacterCardProps) {
+export const MiniCharacterCard = memo(function MiniCharacterCard({ item, onRemove }: MiniCharacterCardProps) {
   return (
     <motion.div
       layout
@@ -26,4 +27,4 @@ export function MiniCharacterCard({ item, onRemove }: MiniCharacterCardProps) {
       <span className="text-[9px] text-[#525252] leading-tight truncate max-w-full">{item.definition}</span>
     </motion.div>
   );
-}
+});

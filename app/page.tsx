@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { CameraViewfinder } from '@/app/components/camera/CameraViewfinder';
 import { CharacterCard } from '@/app/components/character/CharacterCard';
@@ -16,35 +16,66 @@ export default function Home() {
   const { recognize, isReady } = useOCR();
   const { setIsProcessing, activeCard, setActiveCard, setLastScanned } = useApp();
   const [isCapturing, setIsCapturing] = useState(false);
+  const isCapturingRef = useRef(false);
 
   const handleCapture = useCallback(async () => {
-    if (isCapturing || !isReady) return;
+    // Use ref for synchronous check - always current value
+    if (isCapturingRef.current || !isReady) return;
 
+    // Set ref FIRST before any async work
+    isCapturingRef.current = true;
     setIsCapturing(true);
     setIsProcessing(true);
 
     try {
       const frameData = captureFrame();
-      if (!frameData) return;
+      if (!frameData) {
+        isCapturingRef.current = false;
+        setIsCapturing(false);
+        setIsProcessing(false);
+        return;
+      }
 
       const result = await recognize(frameData);
-      if (!result?.text) return;
+      if (!result?.text) {
+        isCapturingRef.current = false;
+        setIsCapturing(false);
+        setIsProcessing(false);
+        return;
+      }
 
       const char = result.text.charAt(0);
       const charData = await findCharacter(char);
-      if (!charData) return;
+      if (!charData) {
+        isCapturingRef.current = false;
+        setIsCapturing(false);
+        setIsProcessing(false);
+        return;
+      }
 
-      setLastScanned(charData);
-      setActiveCard(charData);
+      const charDataWithConfidence = { ...charData, confidence: result.confidence };
+      setLastScanned(charDataWithConfidence);
+      setActiveCard(charDataWithConfidence);
+    } catch (error) {
+      console.error('Capture error:', error);
     } finally {
+      isCapturingRef.current = false;
       setIsCapturing(false);
       setIsProcessing(false);
     }
-  }, [captureFrame, isCapturing, isReady, recognize, setActiveCard, setIsProcessing, setLastScanned]);
+  }, [captureFrame, isReady, recognize, setActiveCard, setIsProcessing, setLastScanned]);
 
   const handleCloseCard = useCallback(() => {
     setActiveCard(null);
   }, [setActiveCard]);
+
+  const handleRetry = useCallback(() => {
+    setActiveCard(null);
+    // Small delay to allow card to close before new capture
+    setTimeout(() => {
+      handleCapture();
+    }, 100);
+  }, [setActiveCard, handleCapture]);
 
   return (
     <main className="relative h-full w-full">
@@ -68,6 +99,7 @@ export default function Home() {
           <CharacterCard
             character={activeCard}
             onClose={handleCloseCard}
+            onRetry={handleRetry}
           />
         )}
       </AnimatePresence>

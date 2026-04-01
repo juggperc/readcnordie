@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, Zap, ImageIcon, ZoomIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,12 @@ interface ControlBarProps {
   onZoomChange?: (zoom: number) => void;
 }
 
-export function ControlBar({ onCapture, isProcessing, disabled, zoom = 1, maxZoom = 5, onZoomChange }: ControlBarProps) {
+export const ControlBar = memo(function ControlBar({ onCapture, isProcessing, disabled, zoom = 1, maxZoom = 5, onZoomChange }: ControlBarProps) {
+  const handleZoomChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (onZoomChange) {
+      onZoomChange(parseFloat(e.target.value));
+    }
+  }, [onZoomChange]);
   return (
     <div className="absolute bottom-0 left-0 right-0 pb-safe-bottom px-6 py-6 flex flex-col items-center gap-4">
       {onZoomChange && (
@@ -25,7 +31,7 @@ export function ControlBar({ onCapture, isProcessing, disabled, zoom = 1, maxZoo
             max={maxZoom}
             step={0.1}
             value={zoom}
-            onChange={(e) => onZoomChange(parseFloat(e.target.value))}
+            onChange={handleZoomChange}
             className="flex-1 h-2 bg-white/20 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
           />
           <span className="text-xs text-white/60 w-8">{zoom.toFixed(1)}x</span>
@@ -79,4 +85,4 @@ export function ControlBar({ onCapture, isProcessing, disabled, zoom = 1, maxZoo
       </div>
     </div>
   );
-}
+});
