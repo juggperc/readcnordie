@@ -4,6 +4,7 @@ import type { OCRResult } from '@/app/types';
 
 export function useOCR() {
   const workerRef = useRef<Worker | null>(null);
+  const recognizingRef = useRef(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isReady, setIsReady] = useState(false);
@@ -56,21 +57,28 @@ export function useOCR() {
   }, []);
 
   const recognize = useCallback(async (imageData: ImageData): Promise<OCRResult | null> => {
-    if (!workerRef.current || !isReady) {
+    if (recognizingRef.current) {
       return null;
     }
 
-    const processedData = preprocessImage(imageData);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
+    const worker = workerRef.current;
+    if (!worker) {
+      return null;
+    }
 
-    canvas.width = processedData.width;
-    canvas.height = processedData.height;
-    ctx.putImageData(processedData, 0, 0);
+    recognizingRef.current = true;
 
     try {
-      const { data } = await workerRef.current.recognize(canvas);
+      const processedData = preprocessImage(imageData);
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return null;
+
+      canvas.width = processedData.width;
+      canvas.height = processedData.height;
+      ctx.putImageData(processedData, 0, 0);
+
+      const { data } = await worker.recognize(canvas);
       const text = data.text.trim();
 
       if (text.length === 0) {
@@ -83,8 +91,10 @@ export function useOCR() {
       };
     } catch {
       return null;
+    } finally {
+      recognizingRef.current = false;
     }
-  }, [isReady]);
+  }, []);
 
   return {
     recognize,

@@ -25,23 +25,17 @@ export default function Home() {
 
     try {
       const frameData = captureFrame();
-      if (!frameData) {
-        setIsCapturing(false);
-        setIsProcessing(false);
-        return;
-      }
+      if (!frameData) return;
 
       const result = await recognize(frameData);
+      if (!result?.text) return;
 
-      if (result && result.text) {
-        const char = result.text.charAt(0);
-        const charData = await findCharacter(char);
+      const char = result.text.charAt(0);
+      const charData = await findCharacter(char);
+      if (!charData) return;
 
-        if (charData) {
-          setLastScanned(charData);
-          setActiveCard(charData);
-        }
-      }
+      setLastScanned(charData);
+      setActiveCard(charData);
     } finally {
       setIsCapturing(false);
       setIsProcessing(false);
