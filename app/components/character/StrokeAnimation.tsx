@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback, memo } from 'react';
 import HanziWriter from 'hanzi-writer';
 
 interface StrokeAnimationProps {
@@ -8,14 +8,18 @@ interface StrokeAnimationProps {
   size?: number;
 }
 
-export function StrokeAnimation({ character, size = 150 }: StrokeAnimationProps) {
+export const StrokeAnimation = memo(function StrokeAnimation({ character, size = 150 }: StrokeAnimationProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const writerRef = useRef<HanziWriter | null>(null);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    const el = containerRef.current;
+    if (!el) return;
 
-    const writer = HanziWriter.create(containerRef.current, character, {
+    el.innerHTML = '';
+    writerRef.current = null;
+
+    const writer = HanziWriter.create(el, character, {
       width: size,
       height: size,
       padding: 5,
@@ -28,36 +32,35 @@ export function StrokeAnimation({ character, size = 150 }: StrokeAnimationProps)
 
     writerRef.current = writer;
 
-    setTimeout(() => {
-      writer.animateCharacter();
-    }, 300);
+    const timer = setTimeout(() => writer.animateCharacter(), 200);
 
     return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
+      clearTimeout(timer);
+      writerRef.current = null;
+      el.innerHTML = '';
     };
   }, [character, size]);
 
-  const handleReplay = () => {
-    if (writerRef.current) {
-      writerRef.current.animateCharacter();
-    }
-  };
+  const handleReplay = useCallback(() => {
+    writerRef.current?.animateCharacter();
+  }, []);
 
   return (
-    <div className="flex flex-col items-center gap-3">
+    <div className="flex flex-col items-center gap-2">
       <div
         ref={containerRef}
         className="hanzi-writer"
         style={{ width: size, height: size }}
       />
       <button
+        type="button"
         onClick={handleReplay}
-        className="text-xs text-[#a3a3a3] hover:text-[#f5f5f5] transition-colors"
+        className="text-xs text-muted-foreground transition-colors hover:text-foreground"
+        aria-label="Replay stroke animation"
+        tabIndex={0}
       >
         Replay animation
       </button>
     </div>
   );
-}
+});
